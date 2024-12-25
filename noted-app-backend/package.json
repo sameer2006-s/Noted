@@ -20,7 +20,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
     "vite": "^6.0.5",
-    "@types/dotenv": "^16.0.1" 
+    "@types/dotenv": "^^16.4.7" 
 
   },
   "dependencies": {
