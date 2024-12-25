@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import react from '@vitejs/plugin-react';
 import * as dotenv from 'dotenv'; // Ensure dotenv is imported
 
-dotenv.config();
+dotenv.config()
 
 export default defineConfig({
   plugins: [

@@ -6,7 +6,6 @@
   "scripts": {
     "start": "npx nodemon",
     "build": "vite build"
-
   },
   "author": "",
   "license": "ISC",
@@ -20,7 +19,9 @@
     "supabase": "^2.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "@types/dotenv": "^16.0.1" 
+
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
