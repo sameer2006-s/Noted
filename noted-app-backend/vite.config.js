@@ -20,6 +20,8 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: './src/index.ts',  // Ensure the correct entry point
+      external: ['@prisma/client', 'supabase', 'vite']
+
     },
   },
 });
