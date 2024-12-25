@@ -119,6 +119,7 @@ const App: React.FC = () => {
 
 
     const deleteNote = async (e:React.MouseEvent,noteId:number)=>{
+      e.preventDefault()
       try {
         const response = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
           method: 'DELETE',
