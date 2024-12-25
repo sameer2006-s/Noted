@@ -93,10 +93,10 @@ const App: React.FC = () => {
     try {
       const response = await fetch(`http://localhost:5000/api/notes/${updatedNote.id}`, {
         method: 'PUT',
-        // headers: {
-        //   'Content-Type': 'application/json',
+         headers: {
+           'Content-Type': 'application/json',
         //   'Authorization': `Bearer your-anon-key` // Supabase API Key
-        // },
+         },
         body: JSON.stringify(updatedNote)
       });
   
@@ -198,8 +198,8 @@ const App: React.FC = () => {
                   {selectedNote
                   ?<div className="flex justify-between items-center w-full px-4">
 
-                    <Button className="bg-slate-500 rounded-md" type="submit">Save</Button>
-                    <Button className="bg-red-600 rounded-md" onClick={()=>handleCancel()}>Cancel</Button>
+                    <Button className="bg-slate-500 rounded-2xl" type="submit">Save</Button>
+                    <Button className="bg-red-600 rounded-2xl" onClick={()=>handleCancel()}>Cancel</Button>
 
                     </div> 
                   
