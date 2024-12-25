@@ -7,9 +7,9 @@ import { Request, Response } from 'express';
 
 
 import { createClient } from '@supabase/supabase-js';
-import { config } from 'dotenv';
+import * as dotenv from 'dotenv';
 import { error } from "console";
-config(); // Load environment variables
+dotenv.config(); // Load environment variables
 
 const supabaseUrl = 'https://gbjtqylynbmhrxietpxt.supabase.co';
 const supabaseKey = process.env.SUPABASE_KEY || '';
