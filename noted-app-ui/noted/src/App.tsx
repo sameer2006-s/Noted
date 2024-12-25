@@ -12,7 +12,9 @@ const App: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(   null   
+  );
+  // { id: 1, title: "Note 1", content: "This is the content of note 1." }
   const [showPhoto, setShowPhoto] = useState<boolean>(false);
 
 
@@ -41,7 +43,44 @@ const App: React.FC = () => {
     setSelectedNote(note);
     setTitle(note.title);
     setContent(note.content);
+    //setSelectedNote(null);
   }
+
+  const handleCancel = ()=>{
+    setTitle("");
+    setContent("");
+    setSelectedNote(null);
+  }
+
+  const handleUpdateNote = (e:React.FormEvent)=>{
+    e.preventDefault()
+
+    if(!selectedNote) return;
+
+    const updatedNote:Note = {
+      id:selectedNote.id,
+      title:title,
+      content:content,
+    }
+
+    const updatedNotesList = notes.map(note=>
+      note.id === selectedNote.id?updatedNote:note
+    )
+
+    setNotes(updatedNotesList)
+    setTitle(""); // Reset the title field
+  setContent(""); // Reset the content field
+  setSelectedNote(null);
+
+  }
+
+
+    const deleteNote = (e:React.MouseEvent,noteId:number)=>{
+      const updatedNotesList = notes.filter(note=>noteId!==note.id)
+      setNotes(updatedNotesList)
+    }
+
+
 
   // Effect to load some initial notes (if needed)
   useEffect(() => {
@@ -66,7 +105,7 @@ const App: React.FC = () => {
               <CardDescription>Add a new note</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={e=>handleSubmit(e)}>
+              <form onSubmit={e=>selectedNote?handleUpdateNote(e):handleSubmit(e)}>
                 <div className="grid w-full items-center gap-4">
                   <div className="flex flex-col space-y-1.5">
                     <Label htmlFor="title">Title</Label>
@@ -90,12 +129,22 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <CardFooter className="flex justify-center mt-4">
-                  <Button
+                  {selectedNote
+                  ?<div className="flex justify-between items-center w-full px-4">
+
+                    <Button className="bg-slate-500" type="submit">Save</Button>
+                    <Button className="bg-red-600" onClick={()=>handleCancel()}>Cancel</Button>
+
+                    </div> 
+                  
+                  
+                  : <Button
                     type="submit"
                     className="bg-slate-800 w-full px-6 text-white rounded-md  py-2 hover:bg-slate-600 transition-all"
                   >
                     Post
-                  </Button>
+                  </Button>}
+                 
                 </CardFooter>
               </form>
             </CardContent>
@@ -118,7 +167,7 @@ const App: React.FC = () => {
       <div className="w-full md:w-1/2 flex flex-col items-start">
           <h2 className="text-xl font-bold mb-4">Your Notes</h2>
           <div className="grid gap-4 w-full  pr-5">
-          {notes.map((note, index) => (
+          {notes.length>0?notes.map((note, index) => (
                 <Card key={index} className="border border-gray-300 p-4">
                     <div className="flex items-center justify-between">
                   <CardTitle className=" pb-3">{note.title}</CardTitle> 
@@ -126,13 +175,13 @@ const App: React.FC = () => {
                   <button onClick={()=>{handleSelection(note)}}>
                   <Edit2Icon className="w-4 h-4 text-gray-500 hover:text-blue-500 transition-all"/>
                   </button>
-                  <DeleteIcon className="w-4 h-4 cursor-pointer text-gray-500 hover:text-red-500 transition-all"/>
+                  <DeleteIcon onClick={(e)=>{deleteNote(e,note.id)}} className="w-4 h-4 cursor-pointer text-gray-500 hover:text-red-500 transition-all"/>
                   </div>
                     </div>
 
                   <CardDescription className="text-left max-w-[400px] break-words">{note.content}</CardDescription>
                 </Card>
-              ))}
+              )):<h2 className="text-black">Add notes to be dispalyed here</h2>}
           </div>
         </div>
         </div>
