@@ -163,15 +163,18 @@ const App: React.FC = () => {
 
   return (
       <>
-  <div className="flex gap-20 p-10">
-      {/* Form for adding a new note */}
-      <Card className="w-[300px] m-10 flex flex-col">
+      <div className="flex flex-col lg:flex-row gap-10 p-20 place-items-start">
+        {/* Form for adding a new note */}
+        <div className="grid gap-4 w-full lg:w-1/2 ">
+          <h1 className="text-6xl font-serif m-10">Noted..</h1>
+          {/* <h3>A Safe space for your dumb ideas</h3> */}
+          <Card className=" flex flex-col max-w-[400px] max-h-[350px] ">
             <CardHeader>
-              <CardTitle>Noted.</CardTitle>
+              <CardTitle >Noted.</CardTitle>
               <CardDescription>Add a new note</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={e=>selectedNote?handleUpdateNote(e):handleSubmit(e)}>
+              <form onSubmit={(e) => (selectedNote ? handleUpdateNote(e) : handleSubmit(e))}>
                 <div className="grid w-full items-center gap-4">
                   <div className="flex flex-col space-y-1.5">
                     <Label htmlFor="title">Title</Label>
@@ -179,6 +182,7 @@ const App: React.FC = () => {
                       id="title"
                       placeholder="Note Title"
                       value={title}
+                      required
                       onChange={(e) => setTitle(e.target.value)}
                     />
                   </div>
@@ -188,70 +192,78 @@ const App: React.FC = () => {
                       id="content"
                       placeholder="What's on your mind"
                       required
-                      className=" p-2 border border-gray-300 rounded-md"
+                      className="p-2 border border-gray-300 rounded-md"
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                     />
                   </div>
                 </div>
                 <CardFooter className="flex justify-center mt-4">
-                  {selectedNote
-                  ?<div className="flex justify-between items-center w-full px-4">
-
-                    <Button className="bg-slate-500 rounded-2xl" type="submit">Save</Button>
-                    <Button className="bg-red-600 rounded-2xl" onClick={()=>handleCancel()}>Cancel</Button>
-
-                    </div> 
-                  
-                  
-                  : <Button
-                    type="submit"
-                    className="bg-slate-800 w-full px-6 text-white rounded-2xl  py-2 hover:bg-slate-600 transition-all"
-                  >
-                    Post
-                  </Button>}
-                 
+                  {selectedNote ? (
+                    <div className="flex justify-between items-center w-full px-4">
+                      <Button className="bg-slate-500 rounded-2xl" type="submit">
+                        Save
+                      </Button>
+                      <Button className="bg-red-600 rounded-2xl" onClick={handleCancel}>
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="submit"
+                      className="bg-slate-800 w-full px-6 text-white rounded-2xl py-2 hover:bg-slate-600 transition-all"
+                    >
+                      Post
+                    </Button>
+                  )}
                 </CardFooter>
               </form>
             </CardContent>
           </Card>
-
-
-          {showPhoto && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-          <img
-            src="https://media1.tenor.com/m/8oMZVK_7fEAAAAAd/spongebob-patrick.gif"
-            alt="Temporary Photo"
-            className="rounded-md w-80 h-80"
-          />
         </div>
-      )}
 
+        {showPhoto && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+            <img
+              src="https://media1.tenor.com/m/8oMZVK_7fEAAAAAd/spongebob-patrick.gif"
+              alt="Temporary Photo"
+              className="rounded-md w-80 h-80"
+            />
+          </div>
+        )}
 
-
-      {/* Display existing notes */}
-      <div className="w-full md:w-1/2 flex flex-col items-start">
+        {/* Display existing notes */}
+        <div className="w-full lg:w-1/2 flex flex-col items-start  max-h-full overflow-auto">
           <h2 className="text-xl font-bold mb-4">Your Notes</h2>
-          <div className="grid gap-4 w-full  pr-5">
-          {notes.length>0?notes.map((note, index) => (
+          <div className="grid gap-4 w-full">
+            {notes.length > 0 ? (
+              notes.map((note, index) => (
                 <Card key={index} className="border border-gray-300 p-4">
-                    <div className="flex items-center justify-between">
-                  <CardTitle className=" pb-3">{note.title}</CardTitle> 
-                  <div className="flex flex-row gap-2">
-                    <div>{note.id}</div>
-                  <button onClick={()=>{handleSelection(note)}}>
-                  <Edit2Icon className="w-4 h-4 text-gray-500 hover:text-blue-500 transition-all"/>
-                  </button>
-                  <DeleteIcon onClick={(e)=>{deleteNote(e,note.id)}} className="w-4 h-4 cursor-pointer text-gray-500 hover:text-red-500 transition-all"/>
-                  </div>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="pb-3 lg:max-w-[500px] max-w-[180px] break-words">{note.title}</CardTitle>
+                    <div className="flex flex-row gap-2">
+                      <div>{note.id}</div>
+                      <button onClick={() => handleSelection(note)}>
+                        <Edit2Icon className="w-4 h-4 text-gray-500 hover:text-blue-500 transition-all" />
+                      </button>
+                      <DeleteIcon
+                        onClick={(e) => deleteNote(e, note.id)}
+                        className="w-4 h-4 cursor-pointer text-gray-500 hover:text-red-500 transition-all"
+                      />
                     </div>
-
-                  <CardDescription className="text-left max-w-[400px] break-words">{note.content}</CardDescription>
+                  </div>
+                  <CardDescription className="text-left lg:max-w-[500px] max-w-[200px] break-words">
+                    {note.content}
+                  </CardDescription>
                 </Card>
-              )):<h2 className="text-black">Add notes to be dispalyed here</h2>}
+              ))
+            ) : (
+              <h2 className="text-black">Add notes to be displayed here</h2>
+            )}
           </div>
         </div>
-        </div>
+      </div>
+  
         </>
   );
 }
