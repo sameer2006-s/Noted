@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import { Prisma, PrismaClient } from "@prisma/client";
+import { Request, Response } from 'express';
 
 
 
@@ -82,6 +83,33 @@ app.get('/api/notes', async (req, res) => {
       res.status(500).json({ message: 'Unexpected error', error: err });
     }
   });
+
+  app.put('/api/notes/:id', async (req, res) => {
+
+    const id = Number(req.params.id);
+  
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).send("Invalid id");
+    }
+  
+    try {
+      const { title, content } = req.body;
+      const { data, error } = await supabase
+        .from('notes')
+        .update({ title, content })
+        .eq('id', id);
+  
+      if (error) {
+        return res.status(500).json({ message: 'Error updating note', error });
+      }
+  
+      res.status(200).json({ message: 'Note updated successfully', data });
+    } catch (err) {
+      res.status(500).json({ message: 'Unexpected error occurred', error: err });
+    }
+  });
+  
+  
 
 app.listen(5000,()=>{
     console.log("server running on port 5000")
