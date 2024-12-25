@@ -48,7 +48,7 @@ app.get('/api/notes', async (req, res) => {
   app.post('/api/notes', async (req, res) => {
     try {
       const { title, content } = req.body; // Destructure the title and content from the request body
-  
+        if(!title||!content)    return res.status(400).send('Title and content are required');
       // Insert new note into the 'notes' table
       const { data, error } = await supabase
         .from('notes')

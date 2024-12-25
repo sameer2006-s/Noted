@@ -27,19 +27,20 @@ const App: React.FC = () => {
         content:content
          };
 
+
          try {
           const response = await fetch('http://localhost:5000/api/notes', {
             method: 'POST',
-            // headers: {
-            //   'Content-Type': 'application/json',
+             headers: {
+              'Content-Type': 'application/json',
             //   'Authorization': `Bearer your-anon-key` // Supabase API Key
-            // },
-            body: JSON.stringify(newNote)
+             },
+            body: JSON.stringify({ title: newNote.title, content: newNote.content })
           });
       
           if (response.ok) {
             const createdNote = await response.json();
-            console.log('Note created:', createdNote);
+            console.log('Note created:', createdNote,newNote);
           } else {
             console.error('Failed to create note', response.statusText);
           }
@@ -74,7 +75,7 @@ const App: React.FC = () => {
     setSelectedNote(null);
   }
 
-  const handleUpdateNote = (e:React.FormEvent)=>{
+  const handleUpdateNote = async (e:React.FormEvent)=>{
     e.preventDefault()
 
     if(!selectedNote) return;
@@ -88,6 +89,26 @@ const App: React.FC = () => {
     const updatedNotesList = notes.map(note=>
       note.id === selectedNote.id?updatedNote:note
     )
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/notes/${updatedNote.id}`, {
+        method: 'PUT',
+        // headers: {
+        //   'Content-Type': 'application/json',
+        //   'Authorization': `Bearer your-anon-key` // Supabase API Key
+        // },
+        body: JSON.stringify(updatedNote)
+      });
+  
+      if (response.ok) {
+        const createdNote = await response.json();
+        console.log('Note created:', createdNote);
+      } else {
+        console.error('Failed to create note', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error creating note:', error);
+    }
 
     setNotes(updatedNotesList)
     setTitle(""); // Reset the title field
@@ -125,6 +146,7 @@ const App: React.FC = () => {
     const fetchNotes = async ()=>{
       const res = await fetch('http://localhost:5000/api/notes')
       const dbNotes= await res.json()
+      console.log(dbNotes)
       setNotes(dbNotes);
     }
 
@@ -176,15 +198,15 @@ const App: React.FC = () => {
                   {selectedNote
                   ?<div className="flex justify-between items-center w-full px-4">
 
-                    <Button className="bg-slate-500" type="submit">Save</Button>
-                    <Button className="bg-red-600" onClick={()=>handleCancel()}>Cancel</Button>
+                    <Button className="bg-slate-500 rounded-md" type="submit">Save</Button>
+                    <Button className="bg-red-600 rounded-md" onClick={()=>handleCancel()}>Cancel</Button>
 
                     </div> 
                   
                   
                   : <Button
                     type="submit"
-                    className="bg-slate-800 w-full px-6 text-white rounded-md  py-2 hover:bg-slate-600 transition-all"
+                    className="bg-slate-800 w-full px-6 text-white rounded-2xl  py-2 hover:bg-slate-600 transition-all"
                   >
                     Post
                   </Button>}
