@@ -53,6 +53,7 @@ app.get('/api/notes', async (req, res) => {
       const { data, error } = await supabase
         .from('notes')
         .insert([{ title, content }]); // Insert data
+      
   
       if (error) {
         res.status(500).json({ message: 'Error creating note', error });
@@ -112,7 +113,7 @@ app.get('/api/notes', async (req, res) => {
  // app.use(express.static('dist'));
 
 
-app.listen(5000,()=>{
+app.listen(5000,'0.0.0.0',()=>{
     console.log("server running on port 5000")
 })
 

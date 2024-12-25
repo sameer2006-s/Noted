@@ -29,7 +29,7 @@ const App: React.FC = () => {
 
 
          try {
-          const response = await fetch('http://localhost:5000/api/notes', {
+          const response = await fetch('http://192.168.1.16:5000/api/notes', {
             method: 'POST',
              headers: {
               'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ const App: React.FC = () => {
     )
 
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/${updatedNote.id}`, {
+      const response = await fetch(`http://192.168.1.16:5000/api/notes/${updatedNote.id}`, {
         method: 'PUT',
          headers: {
            'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ const App: React.FC = () => {
     const deleteNote = async (e:React.MouseEvent,noteId:number)=>{
       e.preventDefault()
       try {
-        const response = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
+        const response = await fetch(`http://192.168.1.16:5000/api/notes/${noteId}`, {
           method: 'DELETE',
           // headers: {
           //   'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ const App: React.FC = () => {
 
 
     const fetchNotes = async ()=>{
-      const res = await fetch('http://localhost:5000/api/notes')
+      const res = await fetch('http://192.168.1.16:5000/api/notes')
       const dbNotes= await res.json()
       console.log(dbNotes)
       setNotes(dbNotes);
