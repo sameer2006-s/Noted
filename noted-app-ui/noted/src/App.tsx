@@ -19,13 +19,35 @@ const App: React.FC = () => {
 
 
   // Handler for form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
       const newNote = { 
         id: notes.length +1, 
         title:title,
-        content
+        content:content
          };
+
+         try {
+          const response = await fetch('http://localhost:5000/api/notes', {
+            method: 'POST',
+            // headers: {
+            //   'Content-Type': 'application/json',
+            //   'Authorization': `Bearer your-anon-key` // Supabase API Key
+            // },
+            body: JSON.stringify(newNote)
+          });
+      
+          if (response.ok) {
+            const createdNote = await response.json();
+            console.log('Note created:', createdNote);
+          } else {
+            console.error('Failed to create note', response.statusText);
+          }
+        } catch (error) {
+          console.error('Error creating note:', error);
+        }
+      
+
       setNotes([...notes, newNote]);
       setTitle("");
       setContent("");
@@ -75,19 +97,41 @@ const App: React.FC = () => {
   }
 
 
-    const deleteNote = (e:React.MouseEvent,noteId:number)=>{
+    const deleteNote = async (e:React.MouseEvent,noteId:number)=>{
+      try {
+        const response = await fetch(`http://localhost:5000/api/notes/${noteId}`, {
+          method: 'DELETE',
+          // headers: {
+          //   'Content-Type': 'application/json',
+          //   'Authorization': `Bearer your-anon-key` // Supabase API Key
+          // },
+        });
+    
+        if (response.ok) {
+          const deleteRes = await response.json();
+          console.log('Note deleted:', deleteRes);
+        } else {
+          console.error('Failed to delete note', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error creating note:', error);
+      }
+    
       const updatedNotesList = notes.filter(note=>noteId!==note.id)
       setNotes(updatedNotesList)
     }
 
 
+    const fetchNotes = async ()=>{
+      const res = await fetch('http://localhost:5000/api/notes')
+      const dbNotes= await res.json()
+      setNotes(dbNotes);
+    }
+
 
   // Effect to load some initial notes (if needed)
   useEffect(() => {
-    setNotes([
-      { id: 1, title: "Note 1", content: "This is the content of note 1." },
-      { id: 2, title: "Note 2", content: "This is the content of note 2." },
-    ]);
+      fetchNotes()
   }, []);
 
   // Handler for deleting a note
@@ -172,6 +216,7 @@ const App: React.FC = () => {
                     <div className="flex items-center justify-between">
                   <CardTitle className=" pb-3">{note.title}</CardTitle> 
                   <div className="flex flex-row gap-2">
+                    <div>{note.id}</div>
                   <button onClick={()=>{handleSelection(note)}}>
                   <Edit2Icon className="w-4 h-4 text-gray-500 hover:text-blue-500 transition-all"/>
                   </button>
