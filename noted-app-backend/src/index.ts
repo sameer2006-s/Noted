@@ -109,7 +109,8 @@ app.get('/api/notes', async (req, res) => {
     }
   });
   
-  
+ // app.use(express.static('dist'));
+
 
 app.listen(5000,()=>{
     console.log("server running on port 5000")

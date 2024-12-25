@@ -11,7 +11,7 @@ export default defineConfig({
     commonjs(),   // Allow CommonJS modules to be used
   ],
   server: {
-    port: 3000,    // Optional, set your desired port
+    port: 5000,    // Optional, set your desired port
     proxy: {
       '/api': 'http://localhost:5000',  // Proxy API requests to your backend
     },
@@ -19,7 +19,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      input: './index.html',  // Ensure the correct entry point
+      input: './src/index.ts',  // Ensure the correct entry point
     },
   },
 });
