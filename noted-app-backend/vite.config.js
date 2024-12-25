@@ -10,8 +10,8 @@ dotenv.config()
 export default defineConfig({
   plugins: [
     react(),
-    node(),       // Allow Node.js modules to be resolved
-    commonjs(),   // Allow CommonJS modules to be used
+    // node(),       // Allow Node.js modules to be resolved
+    // commonjs(),   // Allow CommonJS modules to be used
   ],
   server: {
     port: 5000,    // Optional, set your desired port
