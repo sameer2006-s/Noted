@@ -3,7 +3,7 @@ import { Card, CardTitle, CardDescription, CardFooter, CardHeader, CardContent }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DeleteIcon } from "lucide-react";
+import { DeleteIcon, Edit2Icon } from "lucide-react";
 
 const App: React.FC = () => {
 
@@ -13,6 +13,8 @@ const App: React.FC = () => {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [showPhoto, setShowPhoto] = useState<boolean>(false);
+
 
   // Handler for form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,6 +27,14 @@ const App: React.FC = () => {
       setNotes([...notes, newNote]);
       setTitle("");
       setContent("");
+
+    //   const randomIndex = Math.floor(Math.random() * images.length); // Get a random index
+    // setCurrentImage(images[randomIndex]); // Set the selected random image
+
+      setShowPhoto(true);
+    setTimeout(() => {
+      setShowPhoto(false);
+    }, 1500);
     
   };
   const handleSelection = (note: Note) => {
@@ -73,7 +83,7 @@ const App: React.FC = () => {
                       id="content"
                       placeholder="What's on your mind"
                       required
-                      className="h-[100px] p-2 border border-gray-300 rounded-md"
+                      className=" p-2 border border-gray-300 rounded-md"
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                     />
@@ -91,20 +101,37 @@ const App: React.FC = () => {
             </CardContent>
           </Card>
 
+
+          {showPhoto && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+          <img
+            src="https://media1.tenor.com/m/8oMZVK_7fEAAAAAd/spongebob-patrick.gif"
+            alt="Temporary Photo"
+            className="rounded-md w-80 h-80"
+          />
+        </div>
+      )}
+
+
+
       {/* Display existing notes */}
       <div className="w-full md:w-1/2 flex flex-col items-start">
           <h2 className="text-xl font-bold mb-4">Your Notes</h2>
           <div className="grid gap-4 w-full  pr-5">
           {notes.map((note, index) => (
-            <button onClick={()=>{handleSelection(note)}}>
                 <Card key={index} className="border border-gray-300 p-4">
                     <div className="flex items-center justify-between">
-                  <CardTitle>{note.title}</CardTitle>
-                  <DeleteIcon className="cursor-pointer text-gray-500 hover:text-red-500"/>
+                  <CardTitle className=" pb-3">{note.title}</CardTitle> 
+                  <div className="flex flex-row gap-2">
+                  <button onClick={()=>{handleSelection(note)}}>
+                  <Edit2Icon className="w-4 h-4 text-gray-500 hover:text-blue-500 transition-all"/>
+                  </button>
+                  <DeleteIcon className="w-4 h-4 cursor-pointer text-gray-500 hover:text-red-500 transition-all"/>
+                  </div>
                     </div>
-                  <CardDescription className="text-left">{note.content}</CardDescription>
+
+                  <CardDescription className="text-left max-w-[400px] break-words">{note.content}</CardDescription>
                 </Card>
-                </button>
               ))}
           </div>
         </div>
