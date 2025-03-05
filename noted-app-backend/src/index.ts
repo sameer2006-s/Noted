@@ -1,200 +1,114 @@
-import express from "express"
-import cors from "cors"
-import { Prisma, PrismaClient } from "@prisma/client";
-import { Request, Response } from 'express';
+import express from "express";
+import cors from "cors";
+import sql from "mssql";
+import * as dotenv from "dotenv";
+dotenv.config();
 
+const app = express();
+app.use(express.json());
+app.use(cors());
 
+// Database Configuration
+const dbConfig = {
+  server: "localhost",
+  database: "noted",
+  user: "hello",
+  password: "111",
+  port: 1433,
+  options: {
+    encrypt: false,
+    trustServerCertificate: true,
+    enableArithAbort: true,
+  },
+};
 
+// Function to connect to the database
+async function connectDB() {
+  try {
+    await sql.connect(dbConfig);
+    console.log("Connected to SQL Server");
+  } catch (err) {
+    console.error("Database connection failed", err);
+  }
+}
 
-import { createClient } from '@supabase/supabase-js';
-import * as dotenv from 'dotenv';
-import { error } from "console";
-dotenv.config(); // Load environment variables
+connectDB(); // Connect to database on server start
 
-const supabaseUrl = 'https://gbjtqylynbmhrxietpxt.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Get all notes
+app.get("/api/notes", async (req, res) => {
+  try {
+    const result = await sql.query("SELECT * FROM notes");
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching notes", error: err });
+  }
+});
 
-
-
-
-
-
-const app=express();
-
-const prisma = new PrismaClient(); 
-
-app.use(express.json())
-app.use(cors())
-
-
-
-app.get('/api/notes', async (req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from('notes')
-        .select('*'); // Fetch all notes
-  
-      if (error) {
-        res.status(500).json({ message: 'Error fetching notes', error });
-      } else {
-        res.status(200).json(data);
-      }
-    } catch (err) {
-      res.status(500).json({ message: 'Unexpected error', error: err });
+// Get a single note by ID
+app.get("/api/notes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await sql.query`SELECT * FROM notes WHERE id = ${id}`;
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Note not found" });
     }
-  });
+    res.status(200).json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching note", error: err });
+  }
+});
 
-  app.post('/api/notes', async (req, res) => {
-    try {
-      const { title, content } = req.body; // Destructure the title and content from the request body
-        if(!title||!content)    return res.status(400).send('Title and content are required');
-      // Insert new note into the 'notes' table
-      const { data, error } = await supabase
-        .from('notes')
-        .insert([{ title, content }]); // Insert data
-      
-  
-      if (error) {
-        res.status(500).json({ message: 'Error creating note', error });
-      } else {
-        res.status(201).json(data); // Return the newly created record
-      }
-    } catch (err) {
-      res.status(500).json({ message: 'Unexpected error', error: err });
+// Create a new note
+app.post("/api/notes", async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required" });
     }
-  });
 
+    await sql.query`INSERT INTO notes (title, content) VALUES (${title}, ${content})`;
+    res.status(201).json({ message: "Note created successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error creating note", error: err });
+  }
+});
 
-  app.delete('/api/notes/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      const { data, error } = await supabase
-        .from('notes')
-        .delete()
-        .eq('id', id); // Use the ID to find and delete the specific note
-  
-      if (error) {
-        res.status(500).json({ message: 'Error deleting note', error });
-      } else {
-        res.status(200).json({ message: 'Note deleted successfully', data });
-      }
-    } catch (err) {
-      res.status(500).json({ message: 'Unexpected error', error: err });
+// Update an existing note
+app.put("/api/notes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required" });
     }
-  });
 
-  app.put('/api/notes/:id', async (req, res) => {
-
-    const id = Number(req.params.id);
-  
-    if (isNaN(id) || id <= 0) {
-      return res.status(400).send("Invalid id");
+    const result = await sql.query`UPDATE notes SET title = ${title}, content = ${content} WHERE id = ${id}`;
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ message: "Note not found" });
     }
-  
-    try {
-      const { title, content } = req.body;
-      const { data, error } = await supabase
-        .from('notes')
-        .update({ title, content })
-        .eq('id', id);
-  
-      if (error) {
-        return res.status(500).json({ message: 'Error updating note', error });
-      }
-  
-      res.status(200).json({ message: 'Note updated successfully', data });
-    } catch (err) {
-      res.status(500).json({ message: 'Unexpected error occurred', error: err });
+
+    res.status(200).json({ message: "Note updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating note", error: err });
+  }
+});
+
+// Delete a note
+app.delete("/api/notes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await sql.query`DELETE FROM notes WHERE id = ${id}`;
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ message: "Note not found" });
     }
-  });
-  
- // app.use(express.static('dist'));
 
+    res.status(200).json({ message: "Note deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting note", error: err });
+  }
+});
 
-app.listen(5000,'0.0.0.0',()=>{
-    console.log("server running on port 5000")
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const fs = require('fs');
-// const pg = require('pg');
-// const url = require('url');
-
-// const config = {
-//     user: "avnadmin",
-//     password: "AVNS_AmK3sZUHLsMrPvQZghy",
-//     host: "noted-sql-noted.b.aivencloud.com",
-//     port: 20199,
-//     database: "defaultdb",
-//     ssl: {
-//         rejectUnauthorized: true,
-//         ca: `-----BEGIN CERTIFICATE-----
-// MIIEQTCCAqmgAwIBAgIUESSV9IoZtg8GZnau6il9Kbu+P00wDQYJKoZIhvcNAQEM
-// BQAwOjE4MDYGA1UEAwwvZjkzYzdjNDMtNTQ4My00NTI2LTkzOGUtYmExMzE2MTUw
-// NDEzIFByb2plY3QgQ0EwHhcNMjQxMjI1MTMwNzIxWhcNMzQxMjIzMTMwNzIxWjA6
-// MTgwNgYDVQQDDC9mOTNjN2M0My01NDgzLTQ1MjYtOTM4ZS1iYTEzMTYxNTA0MTMg
-// UHJvamVjdCBDQTCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCCAYoCggGBALE/WCAa
-// +ML+S5zQhfiM55sNrbQ4bt3dQiY4NwtW+xH1fZvtoswjwoBdNyTBDGA3ygratCXj
-// +HuOr4xqSw7E8j9FLBZblArZK4tVC7FOvqb+845kdZ31j3T4YJDHZpX5Oth5NV29
-// 0cRxubpod2U+HoS+5t+y9Cvg8FK1Ib/HzFdRR2Invdj9aR99eXCjFcPg3+nRwN2W
-// hgr6oK0Ao10zKdFoMMNqXjnp8g1qk7KGkLzrVw+mxZ2Rqz3Kv8odCFQ2aNYgOVKl
-// iyr2wohIS4dvkGDAIKCe1pgHrK7D10SeB+YM6G7QvuiXmG0rucQPio1amUgqZZmt
-// 2F8M7AYdnVpqHTh70W8WNNZbdEMLMV/qpQRfysGpj9HDZmxBn+mTmxRjSR5wyfhH
-// RqKIZc5l2roG/Z89pubncZIBM6RbvRWHNbfp/jn3pouGM02huet2ZTiZjzlemQcG
-// x3NvmVxmshiWyTfngceO2FDA0j/LXQnbYdp3qIChmkd7d8TgWCV1hDNPTwIDAQAB
-// oz8wPTAdBgNVHQ4EFgQUDl4oatfMJP67rGUX6iMOvZWt0DwwDwYDVR0TBAgwBgEB
-// /wIBADALBgNVHQ8EBAMCAQYwDQYJKoZIhvcNAQEMBQADggGBAJcUv9cltZLQL5/T
-// HHvPRV14ndIa1nv+rmXU7fwV3KKZIdPjkTCkFfdMW4USV4ixKDhZdPeMy9Cui0Fx
-// pD+OnCS15GkvjzqCZhw10ONN2EDarWdN2aEy3crTMQcP5WJ4nLTxrwUUZTuOuPsw
-// 1sS4BkbT/QGKyVGDCQclPSLNk8Y/2NSgf+yUOzbOeBSPiJzPJuyFirRmSqOqnrfd
-// PWKAHFk3XjZhPzTm9CSL+ACkyGKUFMdKdIssXRXAG6HlRC008pWtGNFEvmzxXhbQ
-// boylP2z/s1C70BRNmuR7jkcMKLJ+Aj4F92NP6qv2lhOX2UkRA7FqluXzbA14VfY2
-// t06hN8v2dYJfGe+cTvq0L6cmMSQuCtzFvXI7MQmpNIyD7+4Zw1vL3148gpZehra3
-// 4MlYHYms5+LVLZrjQfro6oePJD6Kwn4y1MRUjGXsL3h0CLfeIhNTR5V1b6nmyJYm
-// 5fW+H1kB1mzvOjSASzWpncY0SZX5IAqM5dXBETNw+0VTn7UjnQ==
-// -----END CERTIFICATE-----`,
-//     },
-// };
-
-// const client = new pg.Client(config);
-// client.connect(function (err: any) {
-//     if (err)
-//         throw err;
-//     client.query("SELECT VERSION()", [], function (err: any, result: { rows: { version: any; }[]; }) {
-//         if (err)
-//             throw err;
-
-//         console.log(result.rows[0].version);
-//         client.end(function (err: any) {
-//             if (err)
-//                 throw err;
-//         });
-//     });
-// });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
