@@ -2,21 +2,23 @@ import express from "express";
 import cors from "cors";
 import sql from "mssql";
 import * as dotenv from "dotenv";
+
+// Load environment variables
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Database Configuration
-const dbConfig = {
-  server: "localhost",
-  database: "noted",
-  user: "hello",
-  password: "111",
-  port: 1433,
+// Database Configuration with Environment Variables
+const dbConfig: sql.config = {
+  server: process.env.DB_SERVER as string,
+  database: process.env.DB_DATABASE as string,
+  user: process.env.DB_USER as string,
+  password: process.env.DB_PASSWORD as string,
+  port: parseInt(process.env.DB_PORT || "1433"),
   options: {
-    encrypt: false,
+    encrypt: process.env.DB_ENCRYPT === "true",
     trustServerCertificate: true,
     enableArithAbort: true,
   },
@@ -34,7 +36,7 @@ async function connectDB() {
 
 connectDB(); // Connect to database on server start
 
-// Get all notes
+// API Routes
 app.get("/api/notes", async (req, res) => {
   try {
     const result = await sql.query("SELECT * FROM notes");
